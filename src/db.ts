@@ -1,11 +1,15 @@
 import {EntityManager, EntityRepository, MikroORM, Options} from "@mikro-orm/postgresql";
 import {User} from "./entities/User";
 import config from './mikro-orm.config'
+import {FingerprintImage} from "./entities/FingerprintImage";
+import {Dermatoglyphics} from "./entities/Dermatoglyphics";
 
 export interface Services {
   orm: MikroORM;
   em: EntityManager;
   user: EntityRepository<User>;
+  fingerprintImage: EntityRepository<FingerprintImage>;
+  dermatoglyphics: EntityRepository<Dermatoglyphics>;
 }
 
 let dataSource: Services;
@@ -24,6 +28,8 @@ export async function initORM(options?: Options): Promise<Services> {
     orm,
     em: orm.em,
     user: orm.em.getRepository(User),
+    fingerprintImage: orm.em.getRepository(FingerprintImage),
+    dermatoglyphics: orm.em.getRepository(Dermatoglyphics),
   };
   return dataSource;
 }
