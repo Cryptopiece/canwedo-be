@@ -10,10 +10,23 @@ export class User extends BaseEntity {
   @Property()
   username!: string;
 
+  @Property({
+    unique: true
+  })
+  email!: string;
+
   @Property()
   password!: string;
 
-
   @Property()
   role!: string;
+
+  miniUser() {
+    return {
+      id: this.id.toString(),
+      username: this.username,
+      role: this.role,
+      email: this.email,
+    }
+  }
 }
