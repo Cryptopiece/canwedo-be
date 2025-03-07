@@ -59,7 +59,7 @@ export class UserService {
             checked: false
         })
         await db.em.persistAndFlush(fingerprint)
-        return {message: "Fingerprint image updated"};
+        return {message: "Fingerprint image created"};
     }
 
     async updateFingerprintResult(body: any) {
@@ -77,7 +77,7 @@ export class UserService {
             user: user
         });
         await db.em.persistAndFlush(dermatoglyphics);
-        return {message: "Fingerprint result updated"};
+        return {message: "Fingerprint result created"};
     }
 }
 
