@@ -24,10 +24,6 @@ export enum DermatoglyphicsType {
 
 @Entity()
 export class Dermatoglyphics extends BaseEntity {
-    constructor() {
-        super();
-    }
-
     @Enum(() => DermatoglyphicsType)
     leftLitterFingerType!: DermatoglyphicsType;
 

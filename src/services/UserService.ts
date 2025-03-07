@@ -14,16 +14,17 @@ export class UserService {
             username,
             password: hashPassword,
             email,
-            role: "user"
+            role: "user",
+            fingerprintImage: null,
+            dermatoglyphics: null
         })
         await db.em.persistAndFlush(user)
-        return user
+        return user.miniUser();
     }
 
     async login(username: string, password: string) {
         const db = await initORM()
-        const user = await db.user.findOne({$or: [{username}, {email: username}]});
-        if (!user) throw new Error("User not found");
+        const user = await db.user.findOneOrFail({$or: [{username}, {email: username}]});
         const isValid = await Bun.password.verify(password, user.password, 'bcrypt')
         if (!isValid) throw new Error("Invalid password");
         const token = jwt.sign({id: Number(user.id), role: user.role}, process.env.JWT_SECRET ?? "")
@@ -37,11 +38,46 @@ export class UserService {
         }
     }
 
-    async me(user: any) {
+    async me(userId: number) {
         const db = await initORM()
-        const data = await db.user.findOne({id: user.id});
-        if (!data) throw new Error("User not found");
+        const data = await db.user.findOneOrFail({id: userId}, {populate: ['fingerprintImage', 'dermatoglyphics']});
         return data.miniUser();
+    }
+
+    async updateFingerprintImage(userId: number, body: any) {
+        const db = await initORM()
+        const user = await db.user.findOneOrFail({id: userId});
+        if (user.fingerprintImage) {
+            const fingerprint = await db.fingerprintImage.findOneOrFail({user: user})
+            wrap(fingerprint).assign(body)
+            await db.em.persistAndFlush(fingerprint)
+            return {message: "Fingerprint image updated"};
+        }
+        const fingerprint = db.fingerprintImage.create({
+            ...body,
+            user: user,
+            checked: false
+        })
+        await db.em.persistAndFlush(fingerprint)
+        return {message: "Fingerprint image updated"};
+    }
+
+    async updateFingerprintResult(body: any) {
+        const db = await initORM()
+        const user = await db.user.findOneOrFail({id: body.userId});
+        delete body.userId;
+        if (user.dermatoglyphics) {
+            const dermatoglyphics = await db.dermatoglyphics.findOneOrFail({user: user})
+            wrap(dermatoglyphics).assign(body)
+            await db.em.persistAndFlush(dermatoglyphics)
+            return {message: "Fingerprint result updated"};
+        }
+        const dermatoglyphics = db.dermatoglyphics.create({
+            ...body,
+            user: user
+        });
+        await db.em.persistAndFlush(dermatoglyphics);
+        return {message: "Fingerprint result updated"};
     }
 }
 

@@ -6,10 +6,6 @@ type RelationWrapper<T> = T;
 
 @Entity()
 export class FingerprintImage extends BaseEntity {
-    constructor() {
-        super();
-    }
-
     @Property()
     leftLitterFinger!: string;
 
@@ -40,10 +36,8 @@ export class FingerprintImage extends BaseEntity {
     @Property()
     rightThumb!: string;
 
-    @Property({
-        nullable: true,
-    })
-    result!: string;
+    @Property({default: false})
+    checked!: boolean;
 
     @OneToOne(() => User, user => user.fingerprintImage, {mappedBy: 'fingerprintImage', orphanRemoval: true})
     user!: RelationWrapper<User>;

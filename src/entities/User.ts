@@ -7,10 +7,6 @@ type RelationWrapper<T> = T;
 
 @Entity()
 export class User extends BaseEntity {
-    constructor() {
-        super();
-    }
-
     @Property()
     username!: string;
 
@@ -22,14 +18,16 @@ export class User extends BaseEntity {
     @Property()
     password!: string;
 
-    @Property()
+    @Property({
+        default: 'user'
+    })
     role!: string;
 
-    @OneToOne(() => FingerprintImage, fingerprintImage => fingerprintImage.user, {owner: true})
-    fingerprintImage!: RelationWrapper<FingerprintImage>;
+    @OneToOne(() => FingerprintImage, fingerprintImage => fingerprintImage.user, {owner: true, nullable: true})
+    fingerprintImage!: RelationWrapper<FingerprintImage> | null;
 
-    @OneToOne(() => Dermatoglyphics, dermatoglyphics => dermatoglyphics.user, {owner: true})
-    dermatoglyphics!: RelationWrapper<Dermatoglyphics>;
+    @OneToOne(() => Dermatoglyphics, dermatoglyphics => dermatoglyphics.user, {owner: true, nullable: true})
+    dermatoglyphics!: RelationWrapper<Dermatoglyphics> | null;
 
     miniUser() {
         return {
@@ -37,6 +35,8 @@ export class User extends BaseEntity {
             username: this.username,
             role: this.role,
             email: this.email,
+            fingerprintImage: this.fingerprintImage,
+            dermatoglyphics: this.dermatoglyphics
         }
     }
 }
