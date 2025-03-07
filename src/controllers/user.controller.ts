@@ -35,7 +35,7 @@ const userController = new Elysia()
             .post("/update-fingerprint-image", async ({body, user, userService}) => {
                 return await userService.updateFingerprintImage(user.id, body)
             },{
-                checkAuth: ['user'],
+                checkAuth: ['user', 'admin'],
                 detail: {
                     tags: ["User"],
                     security: [

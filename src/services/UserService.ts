@@ -49,7 +49,11 @@ export class UserService {
         const user = await db.user.findOneOrFail({id: userId});
         if (user.fingerprintImage) {
             const fingerprint = await db.fingerprintImage.findOneOrFail({user: user})
-            wrap(fingerprint).assign(body)
+            if (fingerprint.updatedCount >= 3) throw new Error("You can't update fingerprint image more than 3 times");
+            wrap(fingerprint).assign({
+                ...body,
+                updatedCount: fingerprint.updatedCount + 1
+            })
             await db.em.persistAndFlush(fingerprint)
             return {message: "Fingerprint image updated"};
         }

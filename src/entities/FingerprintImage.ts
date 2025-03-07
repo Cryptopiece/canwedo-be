@@ -39,6 +39,9 @@ export class FingerprintImage extends BaseEntity {
     @Property({default: false})
     checked!: boolean;
 
+    @Property({default: 0})
+    updatedCount!: number;
+
     @OneToOne(() => User, user => user.fingerprintImage, {mappedBy: 'fingerprintImage', orphanRemoval: true})
     user!: RelationWrapper<User>;
 }
