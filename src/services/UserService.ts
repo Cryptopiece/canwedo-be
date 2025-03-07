@@ -2,8 +2,10 @@ import {initORM} from "../db";
 import {Elysia} from "elysia";
 import jwt from "jsonwebtoken";
 import {wrap} from "@mikro-orm/core";
+import {YescaleService} from "./YescaleService";
 
 export class UserService {
+    private readonly yescaleService = new YescaleService();
 
     async register(username: string, password: string, email: string) {
         const db = await initORM()
@@ -40,8 +42,8 @@ export class UserService {
 
     async me(userId: number) {
         const db = await initORM()
-        const data = await db.user.findOneOrFail({id: userId}, {populate: ['fingerprintImage', 'dermatoglyphics']});
-        return data.miniUser();
+        const user = await db.user.findOneOrFail({id: userId}, {populate: ['fingerprintImage', 'dermatoglyphics']});
+        return user.miniUser();
     }
 
     async updateFingerprintImage(userId: number, body: any) {
@@ -82,6 +84,71 @@ export class UserService {
         });
         await db.em.persistAndFlush(dermatoglyphics);
         return {message: "Fingerprint result created"};
+    }
+
+    async getFingerprintResult(userId: number) {
+        try {
+            const db = await initORM()
+            const user = await db.user.findOneOrFail({id: userId}, {populate: ['fingerprintImage', 'dermatoglyphics']});
+            if (!user.dermatoglyphics) throw new Error("Fingerprint result not found");
+            // @ts-ignore
+            delete user.dermatoglyphics.user;
+            const {
+                leftLitterFingerType,
+                leftRingFingerType,
+                leftThumbType,
+                rightRingFingerType,
+                rightThumbType,
+                leftIndexFingerType,
+                leftMiddleFingerType,
+                rightIndexFingerType,
+                rightLitterFingerType,
+                rightMiddleFingerType,
+                happinessIndex,
+                hearingIndex,
+                movementIndex,
+                visualIndex,
+                parietalLobePercent,
+                prefrontalLobePercent,
+                frontalLobePercent,
+                occipitalLobePercent,
+                temporalLobePercent
+            } = user.dermatoglyphics;
+            const completion = await this.yescaleService.createChatCompletions(
+                1000,
+                [
+                    {
+                        role: 'user',
+                        content: `Phân tích cho tao về kết quả sinh chắc học vân tay của tao dựa vào data dưới đây:
+                          - Ngón út bên tay trái thuộc loại: ${leftLitterFingerType},
+                          - Ngón đeo nhẫn bên trái thuộc loại: ${leftRingFingerType},
+                          - Ngón giữa bên trái thuộc loại: ${leftMiddleFingerType},
+                          - Ngón trỏ bên trái thuộc loại: ${leftIndexFingerType}, 
+                          - Ngón cái bên trái thuộc loại: ${leftThumbType}, 
+                          - Ngón út bên tay phải thuộc loại: ${rightLitterFingerType},
+                          - Ngón đeo nhẫn bên phải thuộc loại: ${rightRingFingerType},
+                          - Ngón giữa bên phải thuộc loại: ${rightMiddleFingerType},
+                          - Ngón trỏ bên phải thuộc loại: ${rightIndexFingerType},
+                          - Ngón cái bên phải thuộc loại: ${rightThumbType},
+                          - Phần trăm vùng não trước trán là: ${prefrontalLobePercent},
+                          - Phần trăm vùng não trán là: ${frontalLobePercent},
+                          - Phần trăm vùng não chẩm là: ${parietalLobePercent}, 
+                          - Phần trăm vùng não sau đầu là: ${occipitalLobePercent},
+                          - Phần trăm vùng não thái dương là: ${temporalLobePercent},
+                          - Chỉ số hạnh phúc là: ${happinessIndex},
+                          - Chỉ số nghe là: ${hearingIndex}, 
+                          - Chỉ số vận động là: ${movementIndex},
+                          - Chỉ số thị giác là: ${visualIndex}`
+                    }
+                ],
+                "gpt-4o-mini"
+            );
+            console.log(completion.data.choices)
+            return {message: "Result generated"};
+        } catch (e) {
+            console.log(e)
+            throw new Error("Get fingerprint result failed");
+        }
     }
 }
 

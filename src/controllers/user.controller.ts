@@ -34,7 +34,7 @@ const userController = new Elysia()
             })
             .post("/update-fingerprint-image", async ({body, user, userService}) => {
                 return await userService.updateFingerprintImage(user.id, body)
-            },{
+            }, {
                 checkAuth: ['user', 'admin'],
                 detail: {
                     tags: ["User"],
@@ -151,13 +151,27 @@ const userController = new Elysia()
             .get("/me", async ({user, userService}) => {
                 return await userService.me(user.id)
             }, {
-                checkAuth: ['user'],
+                checkAuth: ['user', 'admin'],
                 detail: {
                     tags: ["User"],
                     security: [
                         {JwtAuth: []}
                     ],
                 },
+            })
+            .get("/get-fingerprint-result/:userId", async ({params, userService}) => {
+                return await userService.getFingerprintResult(params.userId);
+            }, {
+                checkAuth: ['admin'],
+                detail: {
+                    tags: ["User"],
+                    security: [
+                        {JwtAuth: []}
+                    ],
+                },
+                params: t.Object({
+                    userId: t.Number()
+                })
             })
     )
 
