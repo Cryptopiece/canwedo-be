@@ -115,11 +115,11 @@ export class UserService {
                 temporalLobePercent
             } = user.dermatoglyphics;
             const completion = await this.yescaleService.createChatCompletions(
-                1000,
+                10000,
                 [
                     {
                         role: 'user',
-                        content: `Phân tích cho tao về kết quả sinh chắc học vân tay của tao dựa vào data dưới đây:
+                        content: `Tôi có một số thông tin về sinh trắc học vân tay của một người dùng như sau:
                           - Ngón út bên tay trái thuộc loại: ${leftLitterFingerType},
                           - Ngón đeo nhẫn bên trái thuộc loại: ${leftRingFingerType},
                           - Ngón giữa bên trái thuộc loại: ${leftMiddleFingerType},
@@ -138,10 +138,13 @@ export class UserService {
                           - Chỉ số hạnh phúc là: ${happinessIndex},
                           - Chỉ số nghe là: ${hearingIndex}, 
                           - Chỉ số vận động là: ${movementIndex},
-                          - Chỉ số thị giác là: ${visualIndex}`
+                          - Chỉ số thị giác là: ${visualIndex}
+                          
+                         Hay phân tích cho tôi những thông tin trên.
+                        `
                     }
                 ],
-                "gpt-4o-mini"
+                "gpt-4o"
             );
             console.log(completion.data.choices)
             return {message: "Result generated"};
@@ -149,6 +152,20 @@ export class UserService {
             console.log(e)
             throw new Error("Get fingerprint result failed");
         }
+    }
+
+    async chainAI(message: string) {
+        const completion = await this.yescaleService.createChatCompletions(
+            10000,
+            [
+                {
+                    role: 'user',
+                    content: message
+                }
+            ],
+            "gpt-4o"
+        );
+        return completion.data.choices;
     }
 }
 

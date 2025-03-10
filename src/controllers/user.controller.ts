@@ -8,9 +8,9 @@ const userController = new Elysia()
         group
             .use(userService)
             .use(authMacro)
-            .post("/register", async ({body, userService}) => {
+            .post("/register", ({body, userService}) => {
                 const {username, password, email} = body
-                return await userService.register(username, password, email);
+                return userService.register(username, password, email);
             }, {
                 detail: {
                     tags: ["User"],
@@ -21,8 +21,8 @@ const userController = new Elysia()
                     email: t.String(),
                 })
             })
-            .post("/login", async ({body, userService}) => {
-                return await userService.login(body.username, body.password);
+            .post("/login", ({body, userService}) => {
+                return userService.login(body.username, body.password);
             }, {
                 detail: {
                     tags: ["User"],
@@ -32,8 +32,8 @@ const userController = new Elysia()
                     password: t.String(),
                 })
             })
-            .post("/update-fingerprint-image", async ({body, user, userService}) => {
-                return await userService.updateFingerprintImage(user.id, body)
+            .post("/update-fingerprint-image", ({body, user, userService}) => {
+                return userService.updateFingerprintImage(user.id, body)
             }, {
                 checkAuth: ['user', 'admin'],
                 detail: {
@@ -55,8 +55,8 @@ const userController = new Elysia()
                     rightThumb: t.String(),
                 })
             })
-            .post("/admin-update-fingerprint-result", async ({userService, body}) => {
-                return await userService.updateFingerprintResult(body)
+            .post("/admin-update-fingerprint-result", ({userService, body}) => {
+                return userService.updateFingerprintResult(body)
             }, {
                 checkAuth: ['admin'],
                 detail: {
@@ -148,8 +148,8 @@ const userController = new Elysia()
                     })
                 })
             })
-            .get("/me", async ({user, userService}) => {
-                return await userService.me(user.id)
+            .get("/me", ({user, userService}) => {
+                return userService.me(user.id)
             }, {
                 checkAuth: ['user', 'admin'],
                 detail: {
@@ -159,8 +159,8 @@ const userController = new Elysia()
                     ],
                 },
             })
-            .get("/get-fingerprint-result/:userId", async ({params, userService}) => {
-                return await userService.getFingerprintResult(params.userId);
+            .get("/get-fingerprint-result/:userId", ({params, userService}) => {
+                return userService.getFingerprintResult(params.userId);
             }, {
                 checkAuth: ['admin'],
                 detail: {
@@ -171,6 +171,20 @@ const userController = new Elysia()
                 },
                 params: t.Object({
                     userId: t.Number()
+                })
+            })
+            .post('/chain-ai', ({body, userService}) => {
+                return userService.chainAI(body.message)
+            }, {
+                checkAuth: ['admin'],
+                detail: {
+                    tags: ["User"],
+                    security: [
+                        {JwtAuth: []}
+                    ],
+                },
+                body: t.Object({
+                    message: t.String(),
                 })
             })
     )
