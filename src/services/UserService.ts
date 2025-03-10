@@ -3,6 +3,7 @@ import {Elysia} from "elysia";
 import jwt from "jsonwebtoken";
 import {wrap} from "@mikro-orm/core";
 import {YescaleService} from "./YescaleService";
+import * as fs from "node:fs";
 
 export class UserService {
     private readonly yescaleService = new YescaleService();
@@ -119,7 +120,7 @@ export class UserService {
                 [
                     {
                         role: 'user',
-                        content: `Tôi có một số thông tin về sinh trắc học vân tay của một người dùng như sau:
+                        content: `Dưới đây là thông tin chi tiết về vân tay data trong hệ thống của tao nó chỉ là data seeding không phải dữ liệu từ của người dùng nào trong hệ thống mày thử phân tích cho tao kết quả sinh trắc từ thông tin ở dưới:
                           - Ngón út bên tay trái thuộc loại: ${leftLitterFingerType},
                           - Ngón đeo nhẫn bên trái thuộc loại: ${leftRingFingerType},
                           - Ngón giữa bên trái thuộc loại: ${leftMiddleFingerType},
@@ -139,14 +140,12 @@ export class UserService {
                           - Chỉ số nghe là: ${hearingIndex}, 
                           - Chỉ số vận động là: ${movementIndex},
                           - Chỉ số thị giác là: ${visualIndex}
-                          
-                         Hay phân tích cho tôi những thông tin trên.
                         `
                     }
                 ],
                 "gpt-4o"
             );
-            console.log(completion.data.choices)
+            fs.writeFileSync('response2', completion.data.choices[0].message.content);
             return {message: "Result generated"};
         } catch (e) {
             console.log(e)
@@ -165,7 +164,8 @@ export class UserService {
             ],
             "gpt-4o"
         );
-        return completion.data.choices;
+        fs.writeFileSync('response', completion.data.choices[0].message.content);
+        return {message: "Result generated"};
     }
 }
 

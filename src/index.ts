@@ -15,7 +15,11 @@ const startApp = async () => {
     const dataSource = await initORM()
     //sync entities classes to database
     await dataSource.orm.getSchemaGenerator().updateSchema();
-    const app = new Elysia()
+    const app = new Elysia({
+      serve: {
+        idleTimeout: 125,
+      }
+    })
       .use(cors())
       .onBeforeHandle(() => RequestContext.enter(dataSource.em))
       .onAfterHandle(responseMiddleware)

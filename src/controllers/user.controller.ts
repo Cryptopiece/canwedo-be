@@ -173,7 +173,7 @@ const userController = new Elysia()
                     userId: t.Number()
                 })
             })
-            .post('/chain-ai', ({body, userService}) => {
+            .post('/chat', ({body, userService}) => {
                 return userService.chainAI(body.message)
             }, {
                 checkAuth: ['admin'],
