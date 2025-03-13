@@ -129,16 +129,16 @@ export class Dermatoglyphics extends BaseEntity {
     @Property({type: 'double'})
     temporalLobePercent!: number;
 
-    @Property()
+    @Property({type: 'double'})
     happinessIndex!: number;
 
-    @Property()
+    @Property({type: 'double'})
     hearingIndex!: number;
 
-    @Property()
+    @Property({type: 'double'})
     movementIndex!: number;
 
-    @Property()
+    @Property({type: 'double'})
     visualIndex!: number;
 
     @OneToOne(() => User, user => user.dermatoglyphics, {mappedBy: 'dermatoglyphics', orphanRemoval: true})
