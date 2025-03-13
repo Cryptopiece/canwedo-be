@@ -27,7 +27,7 @@ export class Dermatoglyphics extends BaseEntity {
     @Enum(() => DermatoglyphicsType)
     leftLitterFingerType!: DermatoglyphicsType;
 
-    @Property()
+    @Property({type: 'double'})
     leftLitterFingerPercent!: number;
 
     @Property()
@@ -36,7 +36,7 @@ export class Dermatoglyphics extends BaseEntity {
     @Enum(() => DermatoglyphicsType)
     leftRingFingerType!: DermatoglyphicsType;
 
-    @Property()
+    @Property({type: 'double'})
     leftRingFingerPercent!: number;
 
     @Property()
@@ -45,7 +45,7 @@ export class Dermatoglyphics extends BaseEntity {
     @Enum(() => DermatoglyphicsType)
     leftMiddleFingerType!: DermatoglyphicsType;
 
-    @Property()
+    @Property({type: 'double'})
     leftMiddleFingerPercent!: number;
 
     @Property()
@@ -54,7 +54,7 @@ export class Dermatoglyphics extends BaseEntity {
     @Enum(() => DermatoglyphicsType)
     leftIndexFingerType!: DermatoglyphicsType;
 
-    @Property()
+    @Property({type: 'double'})
     leftIndexFingerPercent!: number;
 
     @Property()
@@ -63,7 +63,7 @@ export class Dermatoglyphics extends BaseEntity {
     @Enum(() => DermatoglyphicsType)
     leftThumbType!: DermatoglyphicsType;
 
-    @Property()
+    @Property({type: 'double'})
     leftThumbPercent!: number;
 
     @Property()
@@ -72,7 +72,7 @@ export class Dermatoglyphics extends BaseEntity {
     @Enum(() => DermatoglyphicsType)
     rightLitterFingerType!: DermatoglyphicsType;
 
-    @Property()
+    @Property({type: 'double'})
     rightLitterFingerPercent!: number;
 
     @Property()
@@ -81,7 +81,7 @@ export class Dermatoglyphics extends BaseEntity {
     @Enum(() => DermatoglyphicsType)
     rightRingFingerType!: DermatoglyphicsType;
 
-    @Property()
+    @Property({type: 'double'})
     rightRingFingerPercent!: number;
 
     @Property()
@@ -90,7 +90,7 @@ export class Dermatoglyphics extends BaseEntity {
     @Enum(() => DermatoglyphicsType)
     rightMiddleFingerType!: DermatoglyphicsType;
 
-    @Property()
+    @Property({type: 'double'})
     rightMiddleFingerPercent!: number;
 
     @Property()
@@ -99,7 +99,7 @@ export class Dermatoglyphics extends BaseEntity {
     @Enum(() => DermatoglyphicsType)
     rightIndexFingerType!: DermatoglyphicsType;
 
-    @Property()
+    @Property({type: 'double'})
     rightIndexFingerPercent!: number;
 
     @Property()
@@ -108,25 +108,25 @@ export class Dermatoglyphics extends BaseEntity {
     @Enum(() => DermatoglyphicsType)
     rightThumbType!: DermatoglyphicsType;
 
-    @Property()
+    @Property({type: 'double'})
     rightThumbPercent!: number;
 
     @Property()
     rightThumbRank!: number;
 
-    @Property()
+    @Property({type: 'double'})
     prefrontalLobePercent!: number;
 
-    @Property()
+    @Property({type: 'double'})
     frontalLobePercent!: number;
 
-    @Property()
+    @Property({type: 'double'})
     parietalLobePercent!: number;
 
-    @Property()
+    @Property({type: 'double'})
     occipitalLobePercent!: number;
 
-    @Property()
+    @Property({type: 'double'})
     temporalLobePercent!: number;
 
     @Property()
