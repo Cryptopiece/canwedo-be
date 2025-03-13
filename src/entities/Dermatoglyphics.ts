@@ -19,7 +19,7 @@ export enum DermatoglyphicsType {
     AS = 'AS',
     AT = 'AT',
     AU = 'AU',
-    AR = 'AR',
+    AL = 'AL',
 }
 
 @Entity()

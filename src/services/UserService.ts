@@ -4,6 +4,8 @@ import jwt from "jsonwebtoken";
 import {wrap} from "@mikro-orm/core";
 import {YescaleService} from "./YescaleService";
 import * as fs from "node:fs";
+import {fingerprintScore} from "../utils/constant";
+import BigNumber from "bignumber.js";
 
 export class UserService {
     private readonly yescaleService = new YescaleService();
@@ -71,16 +73,43 @@ export class UserService {
 
     async updateFingerprintResult(body: any) {
         const db = await initORM()
+        const score = {
+            leftLitterFinger: fingerprintScore[body.leftLitterFingerType],
+            leftRingFinger: fingerprintScore[body.leftRingFingerType],
+            leftMiddleFinger: fingerprintScore[body.leftMiddleFingerType],
+            leftIndexFinger: fingerprintScore[body.leftIndexFingerType],
+            leftThumb: fingerprintScore[body.leftThumbType],
+            rightLitterFinger: fingerprintScore[body.rightLitterFingerType],
+            rightRingFinger: fingerprintScore[body.rightRingFingerType],
+            rightMiddleFinger: fingerprintScore[body.rightMiddleFingerType],
+            rightIndexFinger: fingerprintScore[body.rightIndexFingerType],
+            rightThumb: fingerprintScore[body.rightThumbType],
+        };
+        const totalScore = Object.values(score).reduce((a, b) => new BigNumber(a).plus(b).toNumber(), 0);
+        const fingerprintsPercentAndRank = this.calculateFingerprintProportion(totalScore, score);
+        const lobePercent = this.calculateLobeProportion(totalScore, score);
+        const vakIndex = this.calculateVakIndex(score);
+        const happinessIndex = 50 - totalScore;
         const user = await db.user.findOneOrFail({id: body.userId});
         delete body.userId;
         if (user.dermatoglyphics) {
             const dermatoglyphics = await db.dermatoglyphics.findOneOrFail({user: user})
-            wrap(dermatoglyphics).assign(body)
+            wrap(dermatoglyphics).assign({
+                ...body,
+                ...fingerprintsPercentAndRank,
+                ...lobePercent,
+                ...vakIndex,
+                happinessIndex,
+            })
             await db.em.persistAndFlush(dermatoglyphics)
             return {message: "Fingerprint result updated"};
         }
         const dermatoglyphics = db.dermatoglyphics.create({
             ...body,
+            ...fingerprintsPercentAndRank,
+            ...lobePercent,
+            ...vakIndex,
+            happinessIndex,
             user: user
         });
         await db.em.persistAndFlush(dermatoglyphics);
@@ -113,39 +142,29 @@ export class UserService {
                 prefrontalLobePercent,
                 frontalLobePercent,
                 occipitalLobePercent,
-                temporalLobePercent
+                temporalLobePercent,
+                leftLitterFingerRank,
+                leftRingFingerRank,
+                leftThumbRank,
+                leftIndexFingerRank,
+                leftMiddleFingerRank,
+                rightRingFingerRank,
+                rightThumbRank,
+                rightIndexFingerRank,
+                rightLitterFingerRank,
+                rightMiddleFingerRank,
             } = user.dermatoglyphics;
             const completion = await this.yescaleService.createChatCompletions(
                 10000,
                 [
                     {
                         role: 'user',
-                        content: `Dưới đây là thông tin chi tiết về vân tay data trong hệ thống của tao nó chỉ là data seeding không phải dữ liệu từ của người dùng nào trong hệ thống mày thử phân tích cho tao kết quả sinh trắc từ thông tin ở dưới:
-                          - Ngón út bên tay trái thuộc loại: ${leftLitterFingerType},
-                          - Ngón đeo nhẫn bên trái thuộc loại: ${leftRingFingerType},
-                          - Ngón giữa bên trái thuộc loại: ${leftMiddleFingerType},
-                          - Ngón trỏ bên trái thuộc loại: ${leftIndexFingerType}, 
-                          - Ngón cái bên trái thuộc loại: ${leftThumbType}, 
-                          - Ngón út bên tay phải thuộc loại: ${rightLitterFingerType},
-                          - Ngón đeo nhẫn bên phải thuộc loại: ${rightRingFingerType},
-                          - Ngón giữa bên phải thuộc loại: ${rightMiddleFingerType},
-                          - Ngón trỏ bên phải thuộc loại: ${rightIndexFingerType},
-                          - Ngón cái bên phải thuộc loại: ${rightThumbType},
-                          - Phần trăm vùng não trước trán là: ${prefrontalLobePercent},
-                          - Phần trăm vùng não trán là: ${frontalLobePercent},
-                          - Phần trăm vùng não chẩm là: ${parietalLobePercent}, 
-                          - Phần trăm vùng não sau đầu là: ${occipitalLobePercent},
-                          - Phần trăm vùng não thái dương là: ${temporalLobePercent},
-                          - Chỉ số hạnh phúc là: ${happinessIndex},
-                          - Chỉ số nghe là: ${hearingIndex}, 
-                          - Chỉ số vận động là: ${movementIndex},
-                          - Chỉ số thị giác là: ${visualIndex}
-                        `
+                        content: `Dưới đây là dữ liệu sinh trắc của của tao, mày có thể cho tao một báo cáo tổng quan chi tiết về Ưu điểm, nhược điểm, cách khắc phục các nhước điểm, nghề nghiệp định hướng của tao: Ngón út bên tay trái thuộc loại: ${leftLitterFingerType}, Xếp hạng năng lực ngón út bên trái: ${leftLitterFingerRank}, Ngón đeo nhẫn bên trái thuộc loại: ${leftRingFingerType}, Xếp hạng năng lực ngón đeo nhẫn bên trái: ${leftRingFingerRank}, Ngón giữa bên trái thuộc loại: ${leftMiddleFingerType}, Xếp hạng năng lực ngón giữa bên trái: ${leftMiddleFingerRank}, Ngón trỏ bên trái thuộc loại: ${leftIndexFingerType}, Xếp hạng năng lực ngón trỏ bên trái: ${leftIndexFingerRank}, Ngón cái bên trái thuộc loại: ${leftThumbType}, Xếp hạng năng lực ngón cái bên trái: ${leftThumbRank}, Ngón út bên tay phải thuộc loại: ${rightLitterFingerType}, Xếp hạng năng lực ngón út bên phải: ${rightLitterFingerRank}, Ngón đeo nhẫn bên phải thuộc loại: ${rightRingFingerType}, Xếp hạng năng lực ngón đeo nhẫn bên phải: ${rightRingFingerRank}, Ngón giữa bên phải thuộc loại: ${rightMiddleFingerType}, Xếp hạng năng lực ngón giữa bên phải: ${rightMiddleFingerRank}, Ngón trỏ bên phải thuộc loại: ${rightIndexFingerType},  Xếp hạng năng lực ngón trỏ bên phải: ${rightIndexFingerRank},  Ngón cái bên phải thuộc loại: ${rightThumbType},  Xếp hạng năng lực ngón cái bên phải: ${rightThumbRank}, Phần trăm vùng não trước trán là: ${prefrontalLobePercent}, Phần trăm vùng não trán là: ${frontalLobePercent},  Phần trăm vùng não chẩm là: ${parietalLobePercent}, Phần trăm vùng não sau đầu là: ${occipitalLobePercent},  Phần trăm vùng não thái dương là: ${temporalLobePercent},  Chỉ số hạnh phúc là: ${happinessIndex},  Chỉ số nghe là: ${hearingIndex},  Chỉ số vận động là: ${movementIndex},  Chỉ số thị giác là: ${visualIndex}`
                     }
                 ],
                 "gpt-4o"
             );
-            fs.writeFileSync('response2', completion.data.choices[0].message.content);
+            fs.writeFileSync('response5', completion.data.choices[0].message.content);
             return {message: "Result generated"};
         } catch (e) {
             console.log(e)
@@ -162,10 +181,46 @@ export class UserService {
                     content: message
                 }
             ],
-            "gpt-4o"
+            "gpt4o"
         );
         fs.writeFileSync('response', completion.data.choices[0].message.content);
         return {message: "Result generated"};
+    }
+
+    private calculateFingerprintProportion(totalScore: any, score: any) {
+        const res: any = {}
+        Object.keys(score).forEach(key => {
+            res[`${key}Percent`] = new BigNumber(score[key]).div(totalScore).times(100).toNumber()
+        });
+        const sortedScore = Object.keys(score).sort((a, b) => score[b] - score[a]);
+        sortedScore.forEach((key, index) => {
+            res[`${key}Rank`] = index + 1;
+        });
+        return res;
+    }
+
+    private calculateLobeProportion(totalScore: number, detailScore: any) {
+        return {
+            prefrontalLobePercent: new BigNumber(detailScore.leftThumb).plus(detailScore.rightThumb).div(totalScore).times(100).toNumber(),
+            frontalLobePercent: new BigNumber(detailScore.leftIndexFinger).plus(detailScore.rightIndexFinger).div(totalScore).times(100).toNumber(),
+            parietalLobePercent: new BigNumber(detailScore.leftMiddleFinger).plus(detailScore.rightMiddleFinger).div(totalScore).times(100).toNumber(),
+            occipitalLobePercent: new BigNumber(detailScore.leftRingFinger).plus(detailScore.rightRingFinger).div(totalScore).times(100).toNumber(),
+            temporalLobePercent: new BigNumber(detailScore.leftLitterFinger).plus(detailScore.rightLitterFinger).div(totalScore).times(100).toNumber(),
+        }
+    }
+
+    private calculateVakIndex(detailScore: any) {
+        const vakTotalNumber = new BigNumber(detailScore.leftLitterFinger)
+            .plus(detailScore.leftRingFinger)
+            .plus(detailScore.leftMiddleFinger)
+            .plus(detailScore.rightLitterFinger)
+            .plus(detailScore.rightRingFinger)
+            .plus(detailScore.rightMiddleFinger);
+        return {
+            movementIndex: new BigNumber(detailScore.leftLitterFinger).plus(detailScore.rightLitterFinger).div(vakTotalNumber).times(100).toNumber(),
+            hearingIndex: new BigNumber(detailScore.leftRingFinger).plus(detailScore.rightRingFinger).div(vakTotalNumber).times(100).toNumber(),
+            visualIndex: new BigNumber(detailScore.leftMiddleFinger).plus(detailScore.rightMiddleFinger).div(vakTotalNumber).times(100).toNumber(),
+        }
     }
 }
 
