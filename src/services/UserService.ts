@@ -73,19 +73,7 @@ export class UserService {
 
     async updateFingerprintResult(body: any) {
         const db = await initORM()
-        const score = {
-            leftLitterFinger: fingerprintScore[body.leftLitterFingerType],
-            leftRingFinger: fingerprintScore[body.leftRingFingerType],
-            leftMiddleFinger: fingerprintScore[body.leftMiddleFingerType],
-            leftIndexFinger: fingerprintScore[body.leftIndexFingerType],
-            leftThumb: fingerprintScore[body.leftThumbType],
-            rightLitterFinger: fingerprintScore[body.rightLitterFingerType],
-            rightRingFinger: fingerprintScore[body.rightRingFingerType],
-            rightMiddleFinger: fingerprintScore[body.rightMiddleFingerType],
-            rightIndexFinger: fingerprintScore[body.rightIndexFingerType],
-            rightThumb: fingerprintScore[body.rightThumbType],
-        };
-        const totalScore = Object.values(score).reduce((a, b) => new BigNumber(a).plus(b).toNumber(), 0);
+        const {score, totalScore} = this.getDetailScore(body);
         const fingerprintsPercentAndRank = this.calculateFingerprintProportion(totalScore, score);
         const lobePercent = this.calculateLobeProportion(totalScore, score);
         const vakIndex = this.calculateVakIndex(score);
@@ -185,6 +173,23 @@ export class UserService {
         );
         fs.writeFileSync('response', completion.data.choices[0].message.content);
         return {message: "Result generated"};
+    }
+
+    private getDetailScore(body: any) {
+        const score = {
+            leftLitterFinger: fingerprintScore[body.leftLitterFingerType],
+            leftRingFinger: fingerprintScore[body.leftRingFingerType],
+            leftMiddleFinger: fingerprintScore[body.leftMiddleFingerType],
+            leftIndexFinger: fingerprintScore[body.leftIndexFingerType],
+            leftThumb: fingerprintScore[body.leftThumbType],
+            rightLitterFinger: fingerprintScore[body.rightLitterFingerType],
+            rightRingFinger: fingerprintScore[body.rightRingFingerType],
+            rightMiddleFinger: fingerprintScore[body.rightMiddleFingerType],
+            rightIndexFinger: fingerprintScore[body.rightIndexFingerType],
+            rightThumb: fingerprintScore[body.rightThumbType],
+        };
+        const totalScore = Object.values(score).reduce((a, b) => new BigNumber(a).plus(b).toNumber(), 0);
+        return {score, totalScore}
     }
 
     private calculateFingerprintProportion(totalScore: any, score: any) {
