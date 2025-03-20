@@ -2,7 +2,7 @@ import {initORM} from "../db";
 import {Elysia} from "elysia";
 import jwt from "jsonwebtoken";
 import {wrap} from "@mikro-orm/core";
-import {YescaleService} from "./YescaleService";
+import {YescaleService} from "./yescale.service";
 import * as fs from "node:fs";
 import {fingerprintScore} from "../utils/constant";
 import BigNumber from "bignumber.js";

@@ -1,10 +1,10 @@
 import {Elysia, t} from "elysia";
-import userService from "../services/UserService";
+import userService from "../services/user.service";
 import authMacro from "../macros/auth";
 import {DermatoglyphicsType} from "../entities/Dermatoglyphics";
 
 const userController = new Elysia()
-    .group("/users", group =>
+    .group("/user", group =>
         group
             .use(userService)
             .use(authMacro)

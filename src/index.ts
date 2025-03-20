@@ -7,8 +7,7 @@ import userController from "./controllers/user.controller";
 import {swagger} from '@elysiajs/swagger'
 import {cors} from '@elysiajs/cors'
 import {opentelemetry} from '@elysiajs/opentelemetry'
-import {BatchSpanProcessor} from '@opentelemetry/sdk-trace-node'
-import {OTLPTraceExporter} from '@opentelemetry/exporter-trace-otlp-proto'
+import minioController from "./controllers/minio.controller";
 
 const startApp = async () => {
   try {
@@ -53,7 +52,7 @@ const startApp = async () => {
       ))
       .use(opentelemetry())
       .group("/api", group =>
-        group.use(userController)
+        group.use(userController).use(minioController)
       )
       .listen(3000);
 
