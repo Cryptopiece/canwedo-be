@@ -10,6 +10,7 @@ const minioController = new Elysia()
             .get("/presigned-url", ({query, minioService}) => {
                 return minioService.makePresignedUrl(query.objectName);
             }, {
+                checkAuth: ['user', 'admin'],
                 detail: {
                     tags: ["Minio"],
                 },
