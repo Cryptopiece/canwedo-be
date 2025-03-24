@@ -107,47 +107,15 @@ export class UserService {
     async getFingerprintResult(userId: number) {
         try {
             const db = await initORM()
-            const user = await db.user.findOneOrFail({id: userId}, {populate: ['fingerprintImage', 'dermatoglyphics']});
-            if (!user.dermatoglyphics) throw new Error("Fingerprint result not found");
-            // @ts-ignore
-            delete user.dermatoglyphics.user;
-            const {
-                leftLitterFingerType,
-                leftRingFingerType,
-                leftThumbType,
-                rightRingFingerType,
-                rightThumbType,
-                leftIndexFingerType,
-                leftMiddleFingerType,
-                rightIndexFingerType,
-                rightLitterFingerType,
-                rightMiddleFingerType,
-                happinessIndex,
-                hearingIndex,
-                movementIndex,
-                visualIndex,
-                parietalLobePercent,
-                prefrontalLobePercent,
-                frontalLobePercent,
-                occipitalLobePercent,
-                temporalLobePercent,
-                leftLitterFingerRank,
-                leftRingFingerRank,
-                leftThumbRank,
-                leftIndexFingerRank,
-                leftMiddleFingerRank,
-                rightRingFingerRank,
-                rightThumbRank,
-                rightIndexFingerRank,
-                rightLitterFingerRank,
-                rightMiddleFingerRank,
-            } = user.dermatoglyphics;
+            const user = await db.user.findOneOrFail({id: userId}, {populate: ['fingerprintImage']});
+            if (!user.fingerprintImage) throw new Error("User haven't uploaded fingerprint image yet");
+            const {leftLitterFinger, leftRingFinger, leftMiddleFinger, leftIndexFinger, leftThumb, rightLitterFinger, rightRingFinger, rightMiddleFinger, rightIndexFinger, rightThumb} = user.fingerprintImage;
             const completion = await this.yescaleService.createChatCompletions(
                 10000,
                 [
                     {
                         role: 'user',
-                        content: `Dưới đây là dữ liệu sinh trắc của của tao, mày có thể cho tao một báo cáo tổng quan chi tiết về Ưu điểm, nhược điểm, cách khắc phục các nhước điểm, nghề nghiệp định hướng của tao: Ngón út bên tay trái thuộc loại: ${leftLitterFingerType}, Xếp hạng năng lực ngón út bên trái: ${leftLitterFingerRank}, Ngón đeo nhẫn bên trái thuộc loại: ${leftRingFingerType}, Xếp hạng năng lực ngón đeo nhẫn bên trái: ${leftRingFingerRank}, Ngón giữa bên trái thuộc loại: ${leftMiddleFingerType}, Xếp hạng năng lực ngón giữa bên trái: ${leftMiddleFingerRank}, Ngón trỏ bên trái thuộc loại: ${leftIndexFingerType}, Xếp hạng năng lực ngón trỏ bên trái: ${leftIndexFingerRank}, Ngón cái bên trái thuộc loại: ${leftThumbType}, Xếp hạng năng lực ngón cái bên trái: ${leftThumbRank}, Ngón út bên tay phải thuộc loại: ${rightLitterFingerType}, Xếp hạng năng lực ngón út bên phải: ${rightLitterFingerRank}, Ngón đeo nhẫn bên phải thuộc loại: ${rightRingFingerType}, Xếp hạng năng lực ngón đeo nhẫn bên phải: ${rightRingFingerRank}, Ngón giữa bên phải thuộc loại: ${rightMiddleFingerType}, Xếp hạng năng lực ngón giữa bên phải: ${rightMiddleFingerRank}, Ngón trỏ bên phải thuộc loại: ${rightIndexFingerType},  Xếp hạng năng lực ngón trỏ bên phải: ${rightIndexFingerRank},  Ngón cái bên phải thuộc loại: ${rightThumbType},  Xếp hạng năng lực ngón cái bên phải: ${rightThumbRank}, Phần trăm vùng não trước trán là: ${prefrontalLobePercent}, Phần trăm vùng não trán là: ${frontalLobePercent},  Phần trăm vùng não chẩm là: ${parietalLobePercent}, Phần trăm vùng não sau đầu là: ${occipitalLobePercent},  Phần trăm vùng não thái dương là: ${temporalLobePercent},  Chỉ số hạnh phúc là: ${happinessIndex},  Chỉ số nghe là: ${hearingIndex},  Chỉ số vận động là: ${movementIndex},  Chỉ số thị giác là: ${visualIndex}`
+                        content: `Dưới đây là dữ liệu về hình ảnh vân tay của tao, hãy cho tao biết dựa vào các hình ảnh này thì ngón tay của tao thuộc chủng gì: Hình ảnh ngón út trái: ${leftLitterFinger}, Hình ảnh ngón áp út trái: ${leftRingFinger}, Hình ảnh ngón giữa trái: ${leftMiddleFinger}, Hình ảnh ngón trỏ trái: ${leftIndexFinger}, Hình ảnh ngón cái trái: ${leftThumb}, Hình ảnh ngón út phải: ${rightLitterFinger}, Hình ảnh ngón áp út phải: ${rightRingFinger}, Hình ảnh ngón giữa phải: ${rightMiddleFinger}, Hình ảnh ngón trỏ phải: ${rightIndexFinger}, Hình ảnh ngón cái phải: ${rightThumb}`
                     }
                 ],
                 "gpt-4o"
