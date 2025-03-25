@@ -18,6 +18,17 @@ const adminController = new Elysia()
                     ],
                 },
             })
+            .get("/chart-12-months", ({adminService}) => {
+                return adminService.getChartData();
+            }, {
+                checkAuth: ['admin', 'contributor'],
+                detail: {
+                    tags: ["Admin"],
+                    security: [
+                        {JwtAuth: []}
+                    ],
+                },
+            }),
     )
 
 export default adminController;

@@ -13,7 +13,76 @@ export class AdminService {
         return {totalUser, totalOrder, orderChecked, orderPending: totalOrder - orderChecked, userGrowth, orderGrowth};
     }
 
-    async getUserGrowth(db: Services) {
+    async getChartData() {
+        return {
+            userChart: await this.getUserChart12Month(),
+            orderChart: await this.getOrderChart12Months()
+        }
+    }
+
+    private async getOrderChart12Months() {
+        const db = await initORM()
+        const now = new Date();
+        const monthNames = [
+            'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+            'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+        ];
+
+        const categories: string[] = [];
+        const data: number[] = [];
+
+        for (let i = 0; i < 12; i++) {
+            const firstDay = new Date(now.getFullYear(), now.getMonth() - i, 1);
+            const lastDay = new Date(now.getFullYear(), now.getMonth() - i + 1, 0);
+            const count = await db.fingerprintImage.count({
+                createdAt: {
+                    $gte: firstDay,
+                    $lt: lastDay
+                }
+            });
+
+            categories.push(monthNames[firstDay.getMonth()]);
+            data.push(count);
+        }
+
+        return {
+            categories: categories.reverse(),
+            data: data.reverse()
+        };
+    }
+
+    private async getUserChart12Month() {
+        const db = await initORM()
+        const now = new Date();
+        const monthNames = [
+            'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+            'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+        ];
+
+        const categories: string[] = [];
+        const data: number[] = [];
+
+        for (let i = 0; i < 12; i++) {
+            const firstDay = new Date(now.getFullYear(), now.getMonth() - i, 1);
+            const lastDay = new Date(now.getFullYear(), now.getMonth() - i + 1, 0);
+            const count = await db.user.count({
+                createdAt: {
+                    $gte: firstDay,
+                    $lt: lastDay
+                }
+            });
+
+            categories.push(monthNames[firstDay.getMonth()]);
+            data.push(count);
+        }
+
+        return {
+            categories: categories.reverse(),
+            data: data.reverse()
+        };
+    }
+
+    private async getUserGrowth(db: Services) {
         const now = new Date();
         const firstDayOfCurrentMonth = new Date(now.getFullYear(), now.getMonth(), 1);
         const firstDayOfPreviousMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
@@ -41,7 +110,7 @@ export class AdminService {
         };
     }
 
-    async getOrderGrowth(db: Services) {
+    private async getOrderGrowth(db: Services) {
         const now = new Date();
         const firstDayOfCurrentMonth = new Date(now.getFullYear(), now.getMonth(), 1);
         const firstDayOfPreviousMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
