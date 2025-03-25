@@ -20,6 +20,21 @@ export class AdminService {
         }
     }
 
+    async getLatestOrders(limit: number, offset: number) {
+        const db = await initORM()
+        const data = await db.fingerprintImage.findAndCount({}, {
+            orderBy: {
+                createdAt: 'DESC'
+            },
+            limit,
+            offset,
+        })
+        return {
+            data: data[0],
+            total: data[1]
+        }
+    }
+
     private async getOrderChart12Months() {
         const db = await initORM()
         const now = new Date();

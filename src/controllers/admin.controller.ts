@@ -1,4 +1,4 @@
-import {Elysia} from "elysia";
+import {Elysia, t} from "elysia";
 import authMacro from "../macros/auth";
 import adminService from "../services/admin.service";
 
@@ -28,7 +28,22 @@ const adminController = new Elysia()
                         {JwtAuth: []}
                     ],
                 },
-            }),
+            })
+            .get('/latest-orders', ({adminService, query}) => {
+                return adminService.getLatestOrders(query.limit, query.offset);
+            }, {
+                checkAuth: ['admin', 'contributor'],
+                detail: {
+                    tags: ["Admin"],
+                    security: [
+                        {JwtAuth: []}
+                    ],
+                },
+                query: t.Object({
+                    limit: t.Number(),
+                    offset: t.Number(),
+                })
+            })
     )
 
 export default adminController;
