@@ -21,7 +21,11 @@ export class UserService {
             email,
             role: "user",
             fingerprintImage: null,
-            dermatoglyphics: null
+            dermatoglyphics: null,
+            firstName: null,
+            lastName: null,
+            phone: null,
+            bio: email
         })
         await db.em.persistAndFlush(user)
         return user.miniUser();
@@ -128,19 +132,12 @@ export class UserService {
         }
     }
 
-    async chainAI(message: string) {
-        const completion = await this.yescaleService.createChatCompletions(
-            10000,
-            [
-                {
-                    role: 'user',
-                    content: message
-                }
-            ],
-            "gpt4o"
-        );
-        fs.writeFileSync('response', completion.data.choices[0].message.content);
-        return {message: "Result generated"};
+    async updateProfileInfo(userId: number, body: any) {
+        const db = await initORM()
+        const user = await db.user.findOneOrFail({id: userId});
+        wrap(user).assign(body);
+        await db.em.persistAndFlush(user);
+        return {message: "Profile updated"};
     }
 
     private getDetailScore(body: any) {
@@ -195,6 +192,7 @@ export class UserService {
             visualIndex: new BigNumber(detailScore.leftMiddleFinger).plus(detailScore.rightMiddleFinger).div(vakTotalNumber).times(100).toNumber(),
         }
     }
+
 }
 
 export default new Elysia().decorate('userService', new UserService())

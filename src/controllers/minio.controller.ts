@@ -13,6 +13,9 @@ const minioController = new Elysia()
                 checkAuth: ['user', 'admin'],
                 detail: {
                     tags: ["Minio"],
+                    security: [
+                        {JwtAuth: []}
+                    ],
                 },
                 query: t.Object({
                     objectName: t.String()

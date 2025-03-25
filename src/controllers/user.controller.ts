@@ -115,7 +115,7 @@ const userController = new Elysia()
             .get("/me", ({user, userService}) => {
                 return userService.me(user.id)
             }, {
-                checkAuth: ['user', 'admin'],
+                checkAuth: ['user', 'admin', 'contributor'],
                 detail: {
                     tags: ["User"],
                     security: [
@@ -137,10 +137,10 @@ const userController = new Elysia()
                     userId: t.Number()
                 })
             })
-            .post('/chat', ({body, userService}) => {
-                return userService.chainAI(body.message)
+            .post("/update-profile-info", ({user, userService, body}) => {
+                return userService.updateProfileInfo(user.id, body)
             }, {
-                checkAuth: ['admin'],
+                checkAuth: ['contributor', 'admin'],
                 detail: {
                     tags: ["User"],
                     security: [
@@ -148,7 +148,10 @@ const userController = new Elysia()
                     ],
                 },
                 body: t.Object({
-                    message: t.String(),
+                    firstName: t.String(),
+                    lastName: t.String(),
+                    phone: t.String(),
+                    bio: t.String(),
                 })
             })
     )

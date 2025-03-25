@@ -7,7 +7,9 @@ type RelationWrapper<T> = T;
 
 @Entity()
 export class User extends BaseEntity {
-    @Property()
+    @Property({
+        unique: true
+    })
     username!: string;
 
     @Property({
@@ -23,6 +25,26 @@ export class User extends BaseEntity {
     })
     role!: string;
 
+    @Property({
+        nullable: true,
+    })
+    firstName!: string | null;
+
+    @Property({
+        nullable: true,
+    })
+    lastName!: string | null;
+
+    @Property({
+        nullable: true,
+    })
+    phone!: string | null;
+
+    @Property({
+        nullable: true,
+    })
+    bio!: string | null;
+
     @OneToOne(() => FingerprintImage, fingerprintImage => fingerprintImage.user, {owner: true, nullable: true})
     fingerprintImage!: RelationWrapper<FingerprintImage> | null;
 
@@ -36,7 +58,13 @@ export class User extends BaseEntity {
             role: this.role,
             email: this.email,
             fingerprintImage: this.fingerprintImage,
-            dermatoglyphics: this.dermatoglyphics
-        }
+            dermatoglyphics: this.dermatoglyphics,
+            createdAt: this.createdAt,
+            updatedAt: this.updatedAt,
+            firstName: this.firstName,
+            lastName: this.lastName,
+            phone: this.phone,
+            bio: this.bio,
+        } as any
     }
 }

@@ -8,6 +8,7 @@ import {swagger} from '@elysiajs/swagger'
 import {cors} from '@elysiajs/cors'
 import {opentelemetry} from '@elysiajs/opentelemetry'
 import minioController from "./controllers/minio.controller";
+import adminController from "./controllers/admin.controller";
 
 const startApp = async () => {
   try {
@@ -52,7 +53,7 @@ const startApp = async () => {
       ))
       .use(opentelemetry())
       .group("/api", group =>
-        group.use(userController).use(minioController)
+        group.use(userController).use(minioController).use(adminController)
       )
       .listen(3000);
 
