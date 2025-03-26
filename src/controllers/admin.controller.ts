@@ -19,6 +19,22 @@ const adminController = new Elysia()
                     ],
                 },
             })
+            .get('/users', ({adminService, query}) => {
+                return adminService.getUsers(query.limit, query.offset, query.role);
+            }, {
+                checkAuth: ['admin'],
+                detail: {
+                    tags: ["Admin"],
+                    security: [
+                        {JwtAuth: []}
+                    ],
+                },
+                query: t.Object({
+                    limit: t.Number(),
+                    offset: t.Number(),
+                    role: t.String()
+                })
+            })
             .get("/chart-12-months", ({adminService}) => {
                 return adminService.getChartData();
             }, {
@@ -100,6 +116,20 @@ const adminController = new Elysia()
                         default: 0,
                         description: "User id"
                     })
+                })
+            })
+            .post('/update-user/:userId', ({adminService, body, params}) => {
+                return adminService.updateUser(+params.userId, body);
+            }, {
+                checkAuth: ['admin'],
+                detail: {
+                    tags: ["User"],
+                    security: [
+                        {JwtAuth: []}
+                    ],
+                },
+                body: t.Object({
+                    role: t.String(),
                 })
             })
     )

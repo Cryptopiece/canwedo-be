@@ -39,6 +39,15 @@ export class AdminService {
         }
     }
 
+    async getUsers(limit: number, offset: number, role: string) {
+        const db = await initORM();
+        const data = await db.user.findAndCount({role}, {limit, offset});
+        return {
+            data: data[0],
+            total: data[1]
+        }
+    }
+
     async updateFingerprintResult(body: any) {
         const db = await initORM()
         const {score, totalScore} = this.getDetailScore(body);
@@ -70,6 +79,14 @@ export class AdminService {
         });
         await db.em.persistAndFlush(dermatoglyphics);
         return {message: "Fingerprint result created"};
+    }
+
+    async updateUser(userId: number, body: any) {
+        const db = await initORM();
+        const user = await db.user.findOneOrFail({id: userId});
+        wrap(user).assign(body);
+        await db.em.persistAndFlush(user);
+        return {message: "User updated"};
     }
 
     private async getOrderChart12Months() {
