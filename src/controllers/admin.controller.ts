@@ -1,6 +1,7 @@
 import {Elysia, t} from "elysia";
 import authMacro from "../macros/auth";
 import adminService from "../services/admin.service";
+import {DermatoglyphicsType} from "../entities/Dermatoglyphics";
 
 const adminController = new Elysia()
     .group("/admin", group =>
@@ -42,6 +43,63 @@ const adminController = new Elysia()
                 query: t.Object({
                     limit: t.Number(),
                     offset: t.Number(),
+                })
+            })
+            .post("/update-fingerprint-result", ({adminService, body}) => {
+                return adminService.updateFingerprintResult(body)
+            }, {
+                checkAuth: ['admin'],
+                detail: {
+                    tags: ["User"],
+                    security: [
+                        {JwtAuth: []}
+                    ],
+                },
+                body: t.Object({
+                    leftLitterFingerType: t.Enum(DermatoglyphicsType, {
+                        default: DermatoglyphicsType.WX,
+                        description: "Left litter finger type"
+                    }),
+                    leftRingFingerType: t.Enum(DermatoglyphicsType, {
+                        default: DermatoglyphicsType.WX,
+                        description: "Left ring finger type"
+                    }),
+                    leftMiddleFingerType: t.Enum(DermatoglyphicsType, {
+                        default: DermatoglyphicsType.WX,
+                        description: "Left middle finger type"
+                    }),
+                    leftIndexFingerType: t.Enum(DermatoglyphicsType, {
+                        default: DermatoglyphicsType.WX,
+                        description: "Left index finger type"
+                    }),
+                    leftThumbType: t.Enum(DermatoglyphicsType, {
+                        default: DermatoglyphicsType.WX,
+                        description: "Left thumb type"
+                    }),
+                    rightLitterFingerType: t.Enum(DermatoglyphicsType, {
+                        default: DermatoglyphicsType.WX,
+                        description: "Right litter finger type"
+                    }),
+                    rightRingFingerType: t.Enum(DermatoglyphicsType, {
+                        default: DermatoglyphicsType.WX,
+                        description: "Right ring finger type"
+                    }),
+                    rightMiddleFingerType: t.Enum(DermatoglyphicsType, {
+                        default: DermatoglyphicsType.WX,
+                        description: "Right middle finger type"
+                    }),
+                    rightIndexFingerType: t.Enum(DermatoglyphicsType, {
+                        default: DermatoglyphicsType.WX,
+                        description: "Right index finger type"
+                    }),
+                    rightThumbType: t.Enum(DermatoglyphicsType, {
+                        default: DermatoglyphicsType.WX,
+                        description: "Right thumb type"
+                    }),
+                    userId: t.Number({
+                        default: 0,
+                        description: "User id"
+                    })
                 })
             })
     )

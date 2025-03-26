@@ -1,5 +1,8 @@
 import {Elysia} from "elysia";
 import {initORM, Services} from "../db";
+import {wrap} from "@mikro-orm/core";
+import {fingerprintScore} from "../utils/constant";
+import BigNumber from "bignumber.js";
 
 export class AdminService {
 
@@ -23,6 +26,7 @@ export class AdminService {
     async getLatestOrders(limit: number, offset: number) {
         const db = await initORM()
         const data = await db.fingerprintImage.findAndCount({}, {
+            populate: ['user'],
             orderBy: {
                 createdAt: 'DESC'
             },
@@ -33,6 +37,39 @@ export class AdminService {
             data: data[0],
             total: data[1]
         }
+    }
+
+    async updateFingerprintResult(body: any) {
+        const db = await initORM()
+        const {score, totalScore} = this.getDetailScore(body);
+        const fingerprintsPercentAndRank = this.calculateFingerprintProportion(totalScore, score);
+        const lobePercent = this.calculateLobeProportion(totalScore, score);
+        const vakIndex = this.calculateVakIndex(score);
+        const happinessIndex = 50 - totalScore;
+        const user = await db.user.findOneOrFail({id: body.userId});
+        delete body.userId;
+        if (user.dermatoglyphics) {
+            const dermatoglyphics = await db.dermatoglyphics.findOneOrFail({user: user})
+            wrap(dermatoglyphics).assign({
+                ...body,
+                ...fingerprintsPercentAndRank,
+                ...lobePercent,
+                ...vakIndex,
+                happinessIndex,
+            })
+            await db.em.persistAndFlush(dermatoglyphics)
+            return {message: "Fingerprint result updated"};
+        }
+        const dermatoglyphics = db.dermatoglyphics.create({
+            ...body,
+            ...fingerprintsPercentAndRank,
+            ...lobePercent,
+            ...vakIndex,
+            happinessIndex,
+            user: user
+        });
+        await db.em.persistAndFlush(dermatoglyphics);
+        return {message: "Fingerprint result created"};
     }
 
     private async getOrderChart12Months() {
@@ -151,6 +188,59 @@ export class AdminService {
             previousMonthOrders,
             growthPercentage: Number(growthPercentage)
         };
+    }
+
+    private getDetailScore(body: any) {
+        const score = {
+            leftLitterFinger: fingerprintScore[body.leftLitterFingerType],
+            leftRingFinger: fingerprintScore[body.leftRingFingerType],
+            leftMiddleFinger: fingerprintScore[body.leftMiddleFingerType],
+            leftIndexFinger: fingerprintScore[body.leftIndexFingerType],
+            leftThumb: fingerprintScore[body.leftThumbType],
+            rightLitterFinger: fingerprintScore[body.rightLitterFingerType],
+            rightRingFinger: fingerprintScore[body.rightRingFingerType],
+            rightMiddleFinger: fingerprintScore[body.rightMiddleFingerType],
+            rightIndexFinger: fingerprintScore[body.rightIndexFingerType],
+            rightThumb: fingerprintScore[body.rightThumbType],
+        };
+        const totalScore = Object.values(score).reduce((a, b) => new BigNumber(a).plus(b).toNumber(), 0);
+        return {score, totalScore}
+    }
+
+    private calculateFingerprintProportion(totalScore: any, score: any) {
+        const res: any = {}
+        Object.keys(score).forEach(key => {
+            res[`${key}Percent`] = new BigNumber(score[key]).div(totalScore).times(100).toNumber()
+        });
+        const sortedScore = Object.keys(score).sort((a, b) => score[b] - score[a]);
+        sortedScore.forEach((key, index) => {
+            res[`${key}Rank`] = index + 1;
+        });
+        return res;
+    }
+
+    private calculateLobeProportion(totalScore: number, detailScore: any) {
+        return {
+            prefrontalLobePercent: new BigNumber(detailScore.leftThumb).plus(detailScore.rightThumb).div(totalScore).times(100).toNumber(),
+            frontalLobePercent: new BigNumber(detailScore.leftIndexFinger).plus(detailScore.rightIndexFinger).div(totalScore).times(100).toNumber(),
+            parietalLobePercent: new BigNumber(detailScore.leftMiddleFinger).plus(detailScore.rightMiddleFinger).div(totalScore).times(100).toNumber(),
+            occipitalLobePercent: new BigNumber(detailScore.leftRingFinger).plus(detailScore.rightRingFinger).div(totalScore).times(100).toNumber(),
+            temporalLobePercent: new BigNumber(detailScore.leftLitterFinger).plus(detailScore.rightLitterFinger).div(totalScore).times(100).toNumber(),
+        }
+    }
+
+    private calculateVakIndex(detailScore: any) {
+        const vakTotalNumber = new BigNumber(detailScore.leftLitterFinger)
+            .plus(detailScore.leftRingFinger)
+            .plus(detailScore.leftMiddleFinger)
+            .plus(detailScore.rightLitterFinger)
+            .plus(detailScore.rightRingFinger)
+            .plus(detailScore.rightMiddleFinger);
+        return {
+            movementIndex: new BigNumber(detailScore.leftLitterFinger).plus(detailScore.rightLitterFinger).div(vakTotalNumber).times(100).toNumber(),
+            hearingIndex: new BigNumber(detailScore.leftRingFinger).plus(detailScore.rightRingFinger).div(vakTotalNumber).times(100).toNumber(),
+            visualIndex: new BigNumber(detailScore.leftMiddleFinger).plus(detailScore.rightMiddleFinger).div(vakTotalNumber).times(100).toNumber(),
+        }
     }
 }
 
