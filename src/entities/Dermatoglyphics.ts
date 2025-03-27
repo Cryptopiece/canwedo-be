@@ -1,4 +1,4 @@
-import {Entity, Enum, OneToOne, Property} from "@mikro-orm/core";
+import {Entity, Enum, ManyToOne, OneToOne, Property} from "@mikro-orm/core";
 import {BaseEntity} from "./BaseEntity";
 import {User} from "./User";
 
@@ -140,6 +140,9 @@ export class Dermatoglyphics extends BaseEntity {
 
     @Property({type: 'double'})
     visualIndex!: number;
+
+    @ManyToOne(() => User)
+    validator!: RelationWrapper<User>;
 
     @OneToOne(() => User, user => user.dermatoglyphics, {mappedBy: 'dermatoglyphics', orphanRemoval: true})
     user!: RelationWrapper<User>;

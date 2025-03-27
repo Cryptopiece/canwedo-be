@@ -75,8 +75,8 @@ const adminController = new Elysia()
                     userId: t.Number()
                 })
             })
-            .post("/update-fingerprint-result", ({adminService, body}) => {
-                return adminService.updateFingerprintResult(body)
+            .post("/update-fingerprint-result", ({adminService, body, user}) => {
+                return adminService.updateFingerprintResult(body, user.id);
             }, {
                 checkAuth: ['admin'],
                 detail: {

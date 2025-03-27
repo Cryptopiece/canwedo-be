@@ -1,5 +1,5 @@
 import {BaseEntity} from "./BaseEntity";
-import {Entity, OneToOne, Property} from "@mikro-orm/core";
+import {Entity, OneToMany, OneToOne, Property} from "@mikro-orm/core";
 import {FingerprintImage} from "./FingerprintImage";
 import {Dermatoglyphics} from "./Dermatoglyphics";
 
@@ -44,6 +44,9 @@ export class User extends BaseEntity {
         nullable: true,
     })
     bio!: string | null;
+
+    @OneToMany(() => Dermatoglyphics, dermatoglyphics => dermatoglyphics.validator, {nullable: true})
+    orderValidated!: RelationWrapper<Dermatoglyphics[]>
 
     @OneToOne(() => FingerprintImage, fingerprintImage => fingerprintImage.user, {owner: true, nullable: true})
     fingerprintImage!: RelationWrapper<FingerprintImage> | null;

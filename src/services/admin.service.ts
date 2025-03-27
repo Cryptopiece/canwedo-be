@@ -41,14 +41,14 @@ export class AdminService {
 
     async getUsers(limit: number, offset: number, role: string) {
         const db = await initORM();
-        const data = await db.user.findAndCount({role}, {limit, offset});
+        const data = await db.user.findAndCount({role}, {limit, offset, populate: ["orderValidated"]});
         return {
             data: data[0],
             total: data[1]
         }
     }
 
-    async updateFingerprintResult(body: any) {
+    async updateFingerprintResult(body: any, validatorId: number) {
         const db = await initORM()
         const {score, totalScore} = this.getDetailScore(body);
         const fingerprintsPercentAndRank = this.calculateFingerprintProportion(totalScore, score);
@@ -56,9 +56,11 @@ export class AdminService {
         const vakIndex = this.calculateVakIndex(score);
         const happinessIndex = 50 - totalScore;
         const user = await db.user.findOneOrFail({id: body.userId});
+        const validator = await db.user.findOneOrFail({id: validatorId});
         delete body.userId;
         if (user.dermatoglyphics) {
             const dermatoglyphics = await db.dermatoglyphics.findOneOrFail({user: user})
+            if (dermatoglyphics.validator.id !== validatorId) throw new Error("You can't update this fingerprint result");
             wrap(dermatoglyphics).assign({
                 ...body,
                 ...fingerprintsPercentAndRank,
@@ -75,7 +77,8 @@ export class AdminService {
             ...lobePercent,
             ...vakIndex,
             happinessIndex,
-            user: user
+            user,
+            validator,
         });
         const fingerprint = await db.fingerprintImage.findOneOrFail({user: user});
         wrap(fingerprint).assign({checked: true});
