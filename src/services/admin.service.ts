@@ -39,6 +39,22 @@ export class AdminService {
         }
     }
 
+    async getOrders(limit: number, offset: number, checked: boolean) {
+        const db = await initORM()
+        const data = await db.fingerprintImage.findAndCount({checked}, {
+            populate: ['user'],
+            orderBy: {
+                createdAt: 'DESC'
+            },
+            limit,
+            offset,
+        })
+        return {
+            data: data[0],
+            total: data[1]
+        }
+    }
+
     async getUsers(limit: number, offset: number, role: string) {
         const db = await initORM();
         const data = await db.user.findAndCount({role}, {limit, offset, populate: ["orderValidated"]});

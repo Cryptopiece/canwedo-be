@@ -61,6 +61,15 @@ const adminController = new Elysia()
                     offset: t.Number(),
                 })
             })
+            .get('/orders', ({adminService, query}) => {
+                return adminService.getOrders(query.limit, query.offset, query.checked);
+            }, {
+                query: t.Object({
+                    limit: t.Number(),
+                    offset: t.Number(),
+                    checked: t.Boolean()
+                })
+            })
             .get("/get-result/:userId", ({adminService, params}) => {
                 return adminService.getFingerprintResult(+params.userId);
             }, {

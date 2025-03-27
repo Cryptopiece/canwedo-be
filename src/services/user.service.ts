@@ -25,7 +25,8 @@ export class UserService {
             firstName: null,
             lastName: null,
             phone: null,
-            bio: email
+            bio: email,
+            orderValidated: []
         })
         await db.em.persistAndFlush(user)
         return user.miniUser();

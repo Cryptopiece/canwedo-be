@@ -46,7 +46,7 @@ export class User extends BaseEntity {
     bio!: string | null;
 
     @OneToMany(() => Dermatoglyphics, dermatoglyphics => dermatoglyphics.validator, {nullable: true})
-    orderValidated!: RelationWrapper<Dermatoglyphics[]>
+    orderValidated!: RelationWrapper<Dermatoglyphics[]> | [];
 
     @OneToOne(() => FingerprintImage, fingerprintImage => fingerprintImage.user, {owner: true, nullable: true})
     fingerprintImage!: RelationWrapper<FingerprintImage> | null;
