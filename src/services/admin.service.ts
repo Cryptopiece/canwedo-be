@@ -57,7 +57,7 @@ export class AdminService {
 
     async getUsers(limit: number, offset: number, role: string) {
         const db = await initORM();
-        const data = await db.user.findAndCount({role}, {limit, offset, populate: ["orderValidated"]});
+        const data = await db.user.findAndCount({role}, {limit, offset});
         return {
             data: data[0],
             total: data[1]
@@ -113,6 +113,15 @@ export class AdminService {
     async getFingerprintResult(userId: number): Promise<any> {
         const db = await initORM();
         return await db.user.findOneOrFail({id: userId}, {populate: ['fingerprintImage', 'dermatoglyphics']});
+    }
+
+    async getDermatoglyphics(validatorId: number, limit: number, offset: number) {
+        const db = await initORM();
+        const data = await db.dermatoglyphics.findAndCount({validator: validatorId}, {populate: ['user', 'user.fingerprintImage'], limit, offset});
+        return {
+            data: data[0],
+            total: data[1]
+        };
     }
 
     private async getOrderChart12Months() {

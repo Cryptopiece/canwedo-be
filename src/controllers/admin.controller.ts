@@ -84,6 +84,25 @@ const adminController = new Elysia()
                     userId: t.Number()
                 })
             })
+            .get(`/get-dermatoglyphics/:validatorId`, ({adminService, params, query}) => {
+                const {limit, offset} = query;
+                return adminService.getDermatoglyphics(+params.validatorId, limit, offset);
+            }, {
+                checkAuth: ['admin'],
+                detail: {
+                    tags: ["Admin"],
+                    security: [
+                        {JwtAuth: []}
+                    ],
+                },
+                params: t.Object({
+                    validatorId: t.Number()
+                }),
+                query: t.Object({
+                    limit: t.Number(),
+                    offset: t.Number(),
+                })
+            })
             .post("/update-fingerprint-result", ({adminService, body, user}) => {
                 return adminService.updateFingerprintResult(body, user.id);
             }, {
