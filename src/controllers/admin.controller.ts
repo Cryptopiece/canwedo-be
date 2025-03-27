@@ -61,12 +61,26 @@ const adminController = new Elysia()
                     offset: t.Number(),
                 })
             })
+            .get("/get-result/:userId", ({adminService, params}) => {
+                return adminService.getFingerprintResult(+params.userId);
+            }, {
+                checkAuth: ['admin'],
+                detail: {
+                    tags: ["Admin"],
+                    security: [
+                        {JwtAuth: []}
+                    ],
+                },
+                params: t.Object({
+                    userId: t.Number()
+                })
+            })
             .post("/update-fingerprint-result", ({adminService, body}) => {
                 return adminService.updateFingerprintResult(body)
             }, {
                 checkAuth: ['admin'],
                 detail: {
-                    tags: ["User"],
+                    tags: ["Admin"],
                     security: [
                         {JwtAuth: []}
                     ],
@@ -123,13 +137,16 @@ const adminController = new Elysia()
             }, {
                 checkAuth: ['admin'],
                 detail: {
-                    tags: ["User"],
+                    tags: ["Admin"],
                     security: [
                         {JwtAuth: []}
                     ],
                 },
                 body: t.Object({
                     role: t.String(),
+                }),
+                params: t.Object({
+                    userId: t.Number()
                 })
             })
     )

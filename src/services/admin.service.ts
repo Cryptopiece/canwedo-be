@@ -77,6 +77,8 @@ export class AdminService {
             happinessIndex,
             user: user
         });
+        const fingerprint = await db.fingerprintImage.findOneOrFail({user: user});
+        wrap(fingerprint).assign({checked: true});
         await db.em.persistAndFlush(dermatoglyphics);
         return {message: "Fingerprint result created"};
     }
@@ -87,6 +89,11 @@ export class AdminService {
         wrap(user).assign(body);
         await db.em.persistAndFlush(user);
         return {message: "User updated"};
+    }
+
+    async getFingerprintResult(userId: number): Promise<any> {
+        const db = await initORM();
+        return await db.user.findOneOrFail({id: userId}, {populate: ['fingerprintImage', 'dermatoglyphics']});
     }
 
     private async getOrderChart12Months() {
