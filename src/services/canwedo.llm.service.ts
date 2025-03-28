@@ -7,7 +7,7 @@ export class CanwedoLlmService {
     private readonly CANWEDO_LLM_API_URL = 'https://canwedo-llm.vinhomes.co.uk';
 
 
-    async analyze(data: any) {
+    async analyze(data: any): Promise<any> {
         return await axios.post(`${this.CANWEDO_LLM_API_URL}/analyze`, data, { headers: this.HEADER })
     }
 }

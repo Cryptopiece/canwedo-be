@@ -85,11 +85,8 @@ export class AdminService {
                 ...fingerprintsPercentAndRank,
                 ...lobePercent,
                 ...vakIndex,
+                ...analysisResponse,
                 happinessIndex,
-                overview: analysisResponse.overview,
-                brainLobes: analysisResponse.brain_lobes,
-                vak: analysisResponse.vak,
-                happiness: analysisResponse.happiness,
             })
             await db.em.persistAndFlush(dermatoglyphics)
             return {message: "Fingerprint result updated"};
@@ -99,13 +96,10 @@ export class AdminService {
             ...fingerprintsPercentAndRank,
             ...lobePercent,
             ...vakIndex,
+            ...analysisResponse,
             happinessIndex,
             user,
             validator,
-            overview: analysisResponse.overview,
-            brainLobes: analysisResponse.brain_lobes,
-            vak: analysisResponse.vak,
-            happiness: analysisResponse.happiness,
         });
         const fingerprint = await db.fingerprintImage.findOneOrFail({user: user});
         wrap(fingerprint).assign({checked: true});
@@ -127,7 +121,12 @@ export class AdminService {
             L5: body.leftLitterFingerType,
         }
         const res = await this.canwedoLlmService.analyze(data);
-        return res.data;
+        return {
+            overview: res.overview,
+            brainLobes: res.brain_lobes,
+            vak: res.vak,
+            happiness: res.happiness,
+        };
     }
 
     async updateUser(userId: number, body: any) {
