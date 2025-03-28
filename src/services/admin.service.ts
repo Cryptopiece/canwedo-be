@@ -3,8 +3,10 @@ import {initORM, Services} from "../db";
 import {wrap} from "@mikro-orm/core";
 import {fingerprintScore} from "../utils/constant";
 import BigNumber from "bignumber.js";
+import {CanwedoLlmService} from "./canwedo.llm.service";
 
 export class AdminService {
+    private readonly canwedoLlmService = new CanwedoLlmService()   ;
 
     async getSystemInfo() {
         const db = await initORM()
@@ -74,6 +76,7 @@ export class AdminService {
         const user = await db.user.findOneOrFail({id: body.userId});
         const validator = await db.user.findOneOrFail({id: validatorId});
         delete body.userId;
+        const analysisResponse = await this.biometricAnalysis(body);
         if (user.dermatoglyphics) {
             const dermatoglyphics = await db.dermatoglyphics.findOneOrFail({user: user})
             if (dermatoglyphics.validator.id !== validatorId) throw new Error("You can't update this fingerprint result");
@@ -83,6 +86,10 @@ export class AdminService {
                 ...lobePercent,
                 ...vakIndex,
                 happinessIndex,
+                overview: analysisResponse.overview,
+                brainLobes: analysisResponse.brain_lobes,
+                vak: analysisResponse.vak,
+                happiness: analysisResponse.happiness,
             })
             await db.em.persistAndFlush(dermatoglyphics)
             return {message: "Fingerprint result updated"};
@@ -95,11 +102,32 @@ export class AdminService {
             happinessIndex,
             user,
             validator,
+            overview: analysisResponse.overview,
+            brainLobes: analysisResponse.brain_lobes,
+            vak: analysisResponse.vak,
+            happiness: analysisResponse.happiness,
         });
         const fingerprint = await db.fingerprintImage.findOneOrFail({user: user});
         wrap(fingerprint).assign({checked: true});
         await db.em.persistAndFlush(dermatoglyphics);
         return {message: "Fingerprint result created"};
+    }
+
+    async biometricAnalysis(body: any) {
+        const data = {
+            R1: body.rightThumbType,
+            R2: body.rightIndexFingerType,
+            R3: body.rightMiddleFingerType,
+            R4: body.rightRingFingerType,
+            R5: body.rightLitterFingerType,
+            L1: body.leftThumbType,
+            L2: body.leftIndexFingerType,
+            L3: body.leftMiddleFingerType,
+            L4: body.leftRingFingerType,
+            L5: body.leftLitterFingerType,
+        }
+        const res = await this.canwedoLlmService.analyze(data);
+        return res.data;
     }
 
     async updateUser(userId: number, body: any) {

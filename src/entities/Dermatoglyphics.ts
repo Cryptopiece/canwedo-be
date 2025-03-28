@@ -141,6 +141,18 @@ export class Dermatoglyphics extends BaseEntity {
     @Property({type: 'double'})
     visualIndex!: number;
 
+    @Property({type: 'char'})
+    overview!: string;
+
+    @Property({type: 'char'})
+    brainLobes!: string
+
+    @Property({type: 'char'})
+    vak!: string;
+
+    @Property({type: 'char'})
+    happiness!: string;
+
     @ManyToOne(() => User)
     validator!: RelationWrapper<User>;
 
