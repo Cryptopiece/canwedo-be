@@ -64,6 +64,13 @@ const adminController = new Elysia()
             .get('/orders', ({adminService, query}) => {
                 return adminService.getOrders(query.limit, query.offset, query.checked);
             }, {
+                checkAuth: ['admin', 'contributor'],
+                detail: {
+                    tags: ["Admin"],
+                    security: [
+                        {JwtAuth: []}
+                    ],
+                },
                 query: t.Object({
                     limit: t.Number(),
                     offset: t.Number(),
@@ -73,7 +80,7 @@ const adminController = new Elysia()
             .get("/get-result/:userId", ({adminService, params}) => {
                 return adminService.getFingerprintResult(+params.userId);
             }, {
-                checkAuth: ['admin'],
+                checkAuth: ['admin', 'contributor'],
                 detail: {
                     tags: ["Admin"],
                     security: [
@@ -88,7 +95,7 @@ const adminController = new Elysia()
                 const {limit, offset} = query;
                 return adminService.getDermatoglyphics(+params.validatorId, limit, offset);
             }, {
-                checkAuth: ['admin'],
+                checkAuth: ['admin', 'contributor'],
                 detail: {
                     tags: ["Admin"],
                     security: [
@@ -106,7 +113,7 @@ const adminController = new Elysia()
             .post("/update-fingerprint-result", ({adminService, body, user}) => {
                 return adminService.updateFingerprintResult(body, user.id);
             }, {
-                checkAuth: ['admin'],
+                checkAuth: ['admin', 'contributor'],
                 detail: {
                     tags: ["Admin"],
                     security: [
