@@ -77,6 +77,7 @@ export class AdminService {
         const validator = await db.user.findOneOrFail({id: validatorId});
         delete body.userId;
         const analysisResponse = await this.biometricAnalysis(body);
+        console.log(analysisResponse);
         if (user.dermatoglyphics) {
             const dermatoglyphics = await db.dermatoglyphics.findOneOrFail({user: user})
             if (dermatoglyphics.validator.id !== validatorId) throw new Error("You can't update this fingerprint result");
@@ -122,10 +123,10 @@ export class AdminService {
         }
         const res = await this.canwedoLlmService.analyze(data);
         return {
-            overview: res.overview,
-            brainLobes: res.brain_lobes,
-            vak: res.vak,
-            happiness: res.happiness,
+            overview: res.data.overview,
+            brainLobes: res.data.brain_lobes,
+            vak: res.data.vak,
+            happiness: res.data.happiness,
         };
     }
 
